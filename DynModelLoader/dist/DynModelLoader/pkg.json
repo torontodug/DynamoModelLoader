@@ -1,0 +1,20 @@
+﻿{
+  "license": "",
+  "file_hash": null,
+  "name": "DynModelLoader",
+  "version": "0.0.1",
+  "description": "Contains various zero-touch nodes that allow you to import various 3D files.",
+  "group": "",
+  "keywords": null,
+  "dependencies": [],
+  "contents": "",
+  "engine_version": "2.0",
+  "engine": "dynamo",
+  "engine_metadata": "",
+  "site_url": "",
+  "repository_url": "",
+  "contains_binaries": true,
+  "node_libraries": [
+    "DynModelLoader, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null"
+  ]
+}
