@@ -29,9 +29,12 @@ For issues with the package, please submit an issue to this repository with the 
 - What happened?
 - What were you expecting?
 - What version of Dynamo were you using?
-- A download link for the 3D mesh file that you used (if possible, but not necessary)
+- A download link for the 3D mesh file that you used (optional, but not necessary)
 
 If you would like to contribute to this project, please submit a pull request and we will review it. If everything with it looks good, we will merge it with the main project. If not, we will request some changes. Please also supply some test files and results with your pull request.
+
+Credits:
+- Wavefront OBJ C# File Loader: https://github.com/chrisjansson/ObjLoader
 
 Enjoy, and feel free to discuss this project on our slack at torontodug.slack.com
 
