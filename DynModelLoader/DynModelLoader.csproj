@@ -35,10 +35,6 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="CjClutter.ObjLoader.Loader, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>3rdparty\CjClutter.ObjLoader.Loader.dll</HintPath>
-    </Reference>
     <Reference Include="DynamoCore">
       <HintPath>..\..\..\..\..\..\..\Program Files\Dynamo\DynamoCore.dll</HintPath>
       <Private>False</Private>
@@ -72,6 +68,11 @@
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="src\ModelLoader.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="AssimpNet">
+      <Version>4.1.0</Version>
+    </PackageReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

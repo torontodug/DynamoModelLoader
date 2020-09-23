@@ -6,8 +6,8 @@ using System.Text;
 using System.Threading.Tasks;
 using Autodesk.DesignScript.Geometry;
 using Autodesk.DesignScript.Runtime;
-using ObjLoader.Loader.Data.Elements;
-using ObjLoader.Loader.Loaders;
+
+using Assimp;
 
 namespace DynModelLoader
 {
@@ -17,45 +17,49 @@ namespace DynModelLoader
     public static class ModelLoader
     {
         /// <summary>
-        /// Loads geometry from an OBJ file into native Dynamo geometry.
+        /// Loads geometry from an OBJ file into native Dynamo geometry. Uses Assimp
         /// </summary>
-        /// <param name="filePath">The filepath of the .OBJ file.</param>
+        /// <param name="filePath">The filepath of the 3D mesh.</param>
         /// <returns>List of OBJ Groups as Dynamo PolySurfaces.</returns>
-        public static List<PolySurface> LoadObj(string filePath)
+        public static List<PolySurface> LoadMesh(string filePath)
         {
-            var loaderFactory = new ObjLoaderFactory();
-            var loader = loaderFactory.Create();
-
-            var fs = new FileStream(filePath, FileMode.Open);
-            var result = loader.Load(fs);
-            
-            fs.Close();
-
             List<PolySurface> polySurfaces = new List<PolySurface>();
 
-            foreach(var group in result.Groups)
+            using(var loader = new AssimpContext())
             {
-                polySurfaces.Add(GetObjGroupMesh(group, result));
+                try
+                {
+                    var scene = loader.ImportFile(filePath, PostProcessSteps.Triangulate);
+                }
+                catch(AssimpException ex)
+                {
+                    throw new Exception(ex.Message);
+                }
+                if(scene.HasMeshes)
+                {
+                    foreach(var mesh in scene.Meshes)
+                    {
+                        polySurfaces.Add(GetPolySurfaceFromAssimpMesh(mesh));
+                    }
+                }
             }
-
             return polySurfaces;
         }
 
-        private static PolySurface GetObjGroupMesh(Group group, LoadResult result)
+        private static PolySurface GetPolySurfaceFromAssimpMesh (Assimp.Mesh mesh)
         {
             var polygons = new List<Surface>();
             var points = new List<Point>();
 
-            foreach (var face in group.Faces)
+            foreach(var face in mesh.Faces)
             {
-                for (int i = 0; i < face.Count; i++)
+                foreach(var index in face.Indices)
                 {
-                    var index = face[i].VertexIndex - 1;
-                    points.Add(Point.ByCoordinates(result.Vertices[index].X, result.Vertices[index].Y, result.Vertices[index].Z));
+                    points.Add(Point.ByCoordinates(mesh.Vertices[index].X, mesh.Vertices[index].Y, mesh.Vertices[index].Z));
                 }
             }
 
-            for (int i = 0; i < points.Count; i += 3)
+            for(int i = 0; i < points.Count; i += 3)
             {
                 int j = i + 1;
                 int k = i + 2;
@@ -80,7 +84,6 @@ namespace DynModelLoader
                     continue;
                 }
             }
-
             return PolySurface.ByJoinedSurfaces(polygons);
         }
     }
