@@ -36,15 +36,15 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="DynamoCore">
-      <HintPath>..\..\..\..\..\..\Program Files\Dynamo\Dynamo Core\2.4\DynamoCore.dll</HintPath>
+      <HintPath>..\..\..\..\..\Program Files\Dynamo\DynamoCore.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="DynamoServices">
-      <HintPath>..\..\..\..\..\..\Program Files\Dynamo\Dynamo Core\2.4\DynamoServices.dll</HintPath>
+      <HintPath>..\..\..\..\..\Program Files\Dynamo\DynamoServices.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="ProtoGeometry">
-      <HintPath>..\..\..\..\..\..\Program Files\Dynamo\Dynamo Core\2.4\ProtoGeometry.dll</HintPath>
+      <HintPath>..\..\..\..\..\Program Files\Dynamo\ProtoGeometry.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="System" />
@@ -57,13 +57,13 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="dist\" />
+    <Folder Include="test_models\" />
   </ItemGroup>
   <ItemGroup>
     <None Include="manifests\pkg.json" />
     <None Include="manifests\DynModelLoader_DynamoCustomization.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="test_models\suzanne_monkey.obj" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />

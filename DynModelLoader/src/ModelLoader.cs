@@ -5,7 +5,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Autodesk.DesignScript.Geometry;
-using Autodesk.DesignScript.Runtime;
 
 using Assimp;
 
@@ -17,78 +16,67 @@ namespace DynModelLoader
     public static class ModelLoader
     {
         /// <summary>
-        /// Loads geometry from an OBJ file into native Dynamo geometry. Uses Assimp
+        /// Loads geometry from a 3D file into native Dynamo geometry.
         /// </summary>
-        /// <param name="filePath">The filepath of the 3D mesh.</param>
-        /// <returns>List of OBJ Groups as Dynamo PolySurfaces.</returns>
-        public static List<PolySurface> LoadMesh(string filePath)
+        /// <param name="filePath">The filepath of the 3D mesh file.</param>
+        /// <returns>List of mesh groups as Dynamo PolySurfaces.</returns>
+        public static List<Autodesk.DesignScript.Geometry.Mesh> LoadMeshToDynamoMesh(string filePath)
         {
-            List<PolySurface> polySurfaces = new List<PolySurface>();
+            List<Autodesk.DesignScript.Geometry.Mesh> dynMeshes = new List<Autodesk.DesignScript.Geometry.Mesh>();
 
-            using(var loader = new AssimpContext())
+            using (var loader = new AssimpContext())
             {
                 Scene scene;
                 try
                 {
-                    scene = loader.ImportFile(filePath, PostProcessSteps.Triangulate);
+                    scene = loader.ImportFile(filePath, PostProcessSteps.Triangulate |
+                                                        PostProcessSteps.FixInFacingNormals |
+                                                        PostProcessSteps.SplitLargeMeshes |
+                                                        PostProcessSteps.OptimizeMeshes |
+                                                        PostProcessSteps.OptimizeGraph |
+                                                        PostProcessSteps.JoinIdenticalVertices |
+                                                        PostProcessSteps.FindDegenerates);
                 }
-                catch(AssimpException ex)
+                catch (AssimpException ex)
                 {
                     throw new Exception(ex.Message);
                 }
-                if(scene.HasMeshes)
+                if (scene.HasMeshes)
                 {
-                    foreach(var mesh in scene.Meshes)
+                    foreach (var mesh in scene.Meshes)
                     {
-                        polySurfaces.Add(GetPolySurfaceFromAssimpMesh(mesh));
+                        dynMeshes.Add(GetDynamoMeshFromAssimpMesh(mesh));
                     }
                 }
             }
-            return polySurfaces;
+            return dynMeshes;
         }
 
-        private static PolySurface GetPolySurfaceFromAssimpMesh (Assimp.Mesh mesh)
+        private static Autodesk.DesignScript.Geometry.Mesh GetDynamoMeshFromAssimpMesh(Assimp.Mesh mesh)
         {
-            var polygons = new List<Surface>();
-            var points = new List<Point>();
-
-            foreach(var face in mesh.Faces)
+            var meshIndices = new List<IndexGroup>();
+            // Go through indices of the mesh
+            var assimpMeshIndices = mesh.GetIndices();
+            for (int i = 0; i < assimpMeshIndices.Length; i+=3)
             {
-                foreach(var index in face.Indices)
-                {
-                    points.Add(Point.ByCoordinates(mesh.Vertices[index].X, mesh.Vertices[index].Y, mesh.Vertices[index].Z));
-                }
+                meshIndices.Add(IndexGroup.ByIndices(
+                    (uint)assimpMeshIndices[i], 
+                    (uint)assimpMeshIndices[i + 1], 
+                    (uint)assimpMeshIndices[i + 2]));
             }
 
-            for(int i = 0; i < points.Count; i += 3)
+            var meshVertices = new List<Point>();
+            // Go through the vertices of the mesh
+            var assimpMeshVertices = mesh.Vertices;
+            for (int i = 0; i < assimpMeshVertices.Count; i++)
             {
-                int j = i + 1;
-                int k = i + 2;
-
-                var point1 = points[i];
-                var point2 = points[j];
-                var point3 = points[k];
-
-                var facePoints = new List<Point>() { point1, point2, point3 };
-                try
-                {
-                    polygons.Add(Surface.ByPerimeterPoints(facePoints));
-                    point1.Dispose();
-                    point2.Dispose();
-                    point3.Dispose();
-                }
-                catch
-                {
-                    point1.Dispose();
-                    point2.Dispose();
-                    point3.Dispose();
-                    continue;
-                }
+                meshVertices.Add(Point.ByCoordinates(
+                    assimpMeshVertices[i].X, 
+                    assimpMeshVertices[i].Y, 
+                    assimpMeshVertices[i].Z));
             }
-            var pSurface = PolySurface.ByJoinedSurfaces(polygons);
-            pSurface.Rotate(Point.Origin(), Vector.XAxis(), 180.0);
-            pSurface.Rotate(Point.Origin(), Vector.YAxis(), 90.0);
-            return pSurface;
+
+            return Autodesk.DesignScript.Geometry.Mesh.ByPointsFaceIndices(meshVertices, meshIndices);
         }
     }
 }
