@@ -27,9 +27,10 @@ namespace DynModelLoader
 
             using(var loader = new AssimpContext())
             {
+                Scene scene;
                 try
                 {
-                    var scene = loader.ImportFile(filePath, PostProcessSteps.Triangulate);
+                    scene = loader.ImportFile(filePath, PostProcessSteps.Triangulate);
                 }
                 catch(AssimpException ex)
                 {
@@ -84,7 +85,10 @@ namespace DynModelLoader
                     continue;
                 }
             }
-            return PolySurface.ByJoinedSurfaces(polygons);
+            var pSurface = PolySurface.ByJoinedSurfaces(polygons);
+            pSurface.Rotate(Point.Origin(), Vector.XAxis(), 180.0);
+            pSurface.Rotate(Point.Origin(), Vector.YAxis(), 90.0);
+            return pSurface;
         }
     }
 }
